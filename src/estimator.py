@@ -1,16 +1,18 @@
 def estimator(data):
 
-  periodtype = data['periodType']
-  timeToElase = data['timeToElapse']
+  periodType = data['periodType']
+  timeToElapse = data['timeToElapse']
   reportedCases = data['reportedCases']
   totalHospitalBeds = data['totalHospitalBeds']
-  avgDailyIncome = data['region']['avgDailyIncomeInUSD']
+  avgDailyIncomeInUSD = data['region']['avgDailyIncomeInUSD']
   avgDailyIncomePopulation = data['region']['avgDailyIncomePopulation']
 
   impactCases = reportedCases * 10
   severeCases = reportedCases * 50
-  available_beds = totalHospitalBeds * 0.35
+  availableBeds = 0.35 * totalHospitalBeds
 
+
+  
   def numberOfDays(periodType, timeToElapse):
     if periodType == 'days':
       days = timeToElapse
@@ -20,55 +22,46 @@ def estimator(data):
       days = timeToElapse * 30
     return days
 
+  
   def noOfCasesTimeToElapse(case):
-    factor = numberOfDays(periodType,timeToElapse)//3
+    factor = numberOfDays(periodType, timeToElapse) // 3
     return case * (2 ** factor)
 
   def severeCasesByRequestedTime(case):
     return 0.15 * noOfCasesTimeToElapse(case)
 
   def hospitalBedsNeeded(case):
-    return int(available_beds - severeCasesByRequestedTime(case))
+    return int(availableBeds - severeCasesByRequestedTime(case))
 
   def ICUCases(case):
     return int(noOfCasesTimeToElapse(case) * 0.05)
 
-  def VentilatorCases(case):
-    return int(noOfCasesTimeToElapse(case) * 0.02)
+  def ventilatorCases(case):
+    return int(noOfCasesTimeToElapse * 0.02)
 
   def moneyLost(case):
-    return int((noOfCasesTimeToElapse * avgDailyIncomePopulation * avgDailyIncome)/numberOfDays(periodType, timeToElapse))
-
-
+    return int((noOfCasesTimeToElapse(case) * avgDailyIncomePopulation * avgDailyIncomeInUSD)/numberOfDays(periodType, timeToElapse))
 
   answer = {
-    'data': data,
-    'impact': {
-      'currentlyInfected': impactCases
-      'infectionsByRequestedTime': noOfCasesTimeToElapse(impactCases)
-      'severeCasesByRequestedTime': severeCasesByRequestedTime(impactCases)
-      'hospitalBedsByRequestedTime': hospitalBedsNeeded(impactCases)
-      'casesForICUByRequestedTime': ICUCases(impactCases)
-      'casesForVentilatorsByRequestedTime': VentilatorCases(impactCases)
-      'dollarInFlight': moneyLost(impactCases)
-    }
-    'severeImpact': {
-      'currentlyInfected': severeCases
-      'infectionsByRequestedTime': noOfCasesTimeToElapse(severeCases)
-      'severeCasesByRequestedTime': severeCasesByRequestedTime(severeCases)
-      'hospitalBedsByRequestedTime': hospitalBedsNeeded(severeCases)
-      'casesForICUByRequestedTime': ICUCases(severeCases)
-      'casesForVentilatorsByRequestedTime': VentilatorCases(severeCases)
-      'dollarInFlight': moneyLost(severeCases)
-      
+    "data":data,
+    "impact": {
+      "currentlyInfected": impactCases,
+      "infectionsByRequestedTime": noOfCasesTimeToElapse(impactCases),
+      "severeCasesByRequestedTime": int(severeCasesByRequestedTime(impactCases)),
+      "hospitalBedsByRequestedTime": hospitalBedsNeeded(impactCases),
+      "casesForICUByRequestedTime": ICUCases(impactCases),
+      "casesForVentilatorsByRequestedTime":ventilatorCases(impactCases),
+      "dollarsInFlight": moneyLost(impactCases)
+    },
+    "severeImpact": {
+      "currentlyInfected": severeCases,
+      "infectionsByRequestedTime": noOfCasesTimeToElapse(severeCases),
+      "severeCasesByRequestedTime": int(severeCasesByRequestedTime(severeCases)),
+      "hospitalBedsByRequestedTime": hospitalBedsNeeded(severeCases),
+      "casesForICUByRequestedTime": ICUCases(severeCases),
+      "casesForVentilatorsByRequestedTime": ventilatorCases(severeCases),
+      "dollarsInFlight": moneyLost(severeCases)
     }
   }
-  
-
-  
-  
- 
-  
-
 
   return answer
