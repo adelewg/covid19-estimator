@@ -37,7 +37,7 @@ def estimator(data):
     return int(noOfCasesTimeToElapse(case) * 0.05)
 
   def ventilatorCases(case):
-    return int(noOfCasesTimeToElapse * 0.02)
+    return int(noOfCasesTimeToElapse(case) * 0.02)
 
   def moneyLost(case):
     return int((noOfCasesTimeToElapse(case) * avgDailyIncomePopulation * avgDailyIncomeInUSD)/numberOfDays(periodType, timeToElapse))
